@@ -1,4 +1,7 @@
+import lib
+import json
 import os
+import urllib
 import re
 import lib_cached
 import mylib.tools
@@ -16,6 +19,11 @@ def max_limit(gen):
 
 class CC():
     def ls(self):
+        out, err, status = self._ls()
+        out = [x.strip().rstrip('/') for x in out if '-MAIN-' in x]
+        out = [re.sub('^PRE ', '', x) for x in out]
+        return out
+    def _ls(self):
         return lib_cached.run_command_get_output('aws s3 ls s3://commoncrawl/crawl-data/')
     def get_paths(self, name):
         dirname = os.path.join(data_dir, name)
@@ -30,11 +38,18 @@ class CC():
                 print('running {}'.format(cmd))
                 mylib.tools.run_command_get_output(cmd)
     def get_paths_all(self):
-        out, err, status = self.ls()
-        out = [x.strip().rstrip('/') for x in out if '-MAIN-' in x]
-        out = [re.sub('^PRE ', '', x) for x in out]
+        out = self.ls()
         for x in max_limit(out):
             self.get_paths(x)
+    def search(self, crawl, text):
+        r = self._search(crawl, text)
+        r = r.content.strip().split(b'\n')
+        r = [json.loads(x) for x in r]
+        return r
+    def _search(self, crawl, text):
+        text = urllib.parse.quote_plus(text)
+        url = 'http://index.commoncrawl.org/{}-index?url={}&output=json'.format(crawl, text)
+        return lib_cached.requests_get(url)
 
 
 
