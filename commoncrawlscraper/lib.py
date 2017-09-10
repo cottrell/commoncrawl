@@ -1,10 +1,9 @@
-import lib
 import pickle
 import json
 import os
 import urllib
 import re
-import lib_cached
+import commoncrawlscraper.lib_cached as lib_cached
 import mylib.tools
 
 _mydir = os.path.dirname(os.path.realpath(__file__))
