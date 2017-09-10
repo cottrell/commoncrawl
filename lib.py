@@ -9,7 +9,7 @@ import mylib.tools
 
 _mydir = os.path.dirname(os.path.realpath(__file__))
 
-n_max = 3
+n_max = -1 
 data_dir = os.path.join(_mydir, 'crawl-data') # some things will break if this is not called crawl-data
 
 _baseurl = "https://commoncrawl.s3.amazonaws.com"
@@ -65,18 +65,23 @@ class CC():
         r = r.strip().split('\n')
         r = [json.loads(x) for x in r]
         return r
-    def get_crawl_from_json(self, json_entry, return_result=True):
-        """
-        curl -H "range: bytes=822555329-822557378" -O https://commoncrawl.s3.amazonaws.com/crawl-data/CC-MAIN-2017-04/segments/1484560279657.18/warc/CC-MAIN-20170116095119-00156-ip-10-171-10-70.ec2.internal.warc.gz
-        """
+    def get_crawl_from_json(self, json_entry, return_result=False):
+        """ This will produce large data potentially """
         start = int(json_entry['offset'])
         stop = start + int(json_entry['length'])
         filename = json_entry['filename']
-        cmd = "curl -H 'range: {start}-{stop}' -O '{baseurl}/{filename}' > {filename}"
-        cmd = cmd.format(start=start, stop=stop, baseurl=_baseurl, filename=filename)
-        dirname = os.path.dirname(filename)
+        assert filename.startswith('crawl-data/'), 'Expect crawl-data got {}'.filename(filename)
+        cachefile = os.path.join('search-data', filename[11:])
+        # there is some issue with the footer being broken/missing ... pipe through zless as quickfix
+        cmd = "curl -s -H 'range: bytes={start}-{stop}' '{baseurl}/{filename}' | zless | gzip -c > {cachefile}"
+        cmd = cmd.format(start=start, stop=stop, baseurl=_baseurl, filename=filename, cachefile=cachefile)
+        dirname = os.path.dirname(cachefile)
         if not os.path.exists(dirname):
             os.makedirs(dirname)
-        return lib_cached.run_cmd_with_cachefile(filename, cmd, return_result=return_result)
+        ret = lib_cached.run_cmd_with_cachefile(cachefile, cmd, return_result=return_result)
+        if return_result:
+            return ret
+        else:
+            return cachefile
 
 cc = CC()
