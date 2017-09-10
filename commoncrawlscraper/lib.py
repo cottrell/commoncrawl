@@ -56,7 +56,9 @@ class CC():
         for crawl in max_limit(out):
             res.extend(self.search(crawl, text))
         return res
-    def search(self, crawl, text):
+    def search(self, text, crawl=None):
+        if crawl is None:
+            crawl = self.list_crawls()[-1]
         text = urllib.parse.quote_plus(text)
         filename = os.path.join(data_dir, crawl, text) + '.json'
         url = 'http://index.commoncrawl.org/{}-index?url={}&output=json'.format(crawl, text)
