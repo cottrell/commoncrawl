@@ -1,4 +1,6 @@
+#!/usr/bin/env python
 import pickle
+import argh
 import json
 import os
 import urllib
@@ -59,6 +61,8 @@ class CC():
     def search(self, text, crawl=None):
         if crawl is None:
             crawl = self.list_crawls()[-1]
+        if crawl == 'all':
+            return self.search_all_crawls(text)
         text = urllib.parse.quote_plus(text)
         filename = os.path.join(data_dir, crawl, text) + '.json'
         url = 'http://index.commoncrawl.org/{}-index?url={}&output=json'.format(crawl, text)
@@ -88,3 +92,9 @@ class CC():
             return cachefile
 
 cc = CC()
+
+def main(url, coll=None):
+    cc.search(url, crawl=coll)
+
+if __name__ == '__main__':
+    argh.dispatch_command(main)
