@@ -1,6 +1,5 @@
 """
 Put things in here to avoid reset cache on imp.reload.
-
 """
 import mylib.tools
 from functools import lru_cache
@@ -23,4 +22,3 @@ def run_cmd_with_cachefile(filename, cmd, *args, return_result=True, **kwargs):
             return gzip.open(filename).read()
         else:
             return open(filename).read()
-        
