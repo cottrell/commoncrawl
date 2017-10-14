@@ -84,7 +84,7 @@ class CC():
         filename = json_entry['filename']
         assert filename.startswith('crawl-data/'), 'Expect crawl-data got {}'.filename(filename)
         # WARNING this is just printing to current dir (search-data) is persisted to where you work
-        cachefile = os.path.join('search-data', filename[11:])
+        cachefile = os.path.join('search-data', filename[11:]) + 'bytes={}-{}'.format(start, stop)
         # there is some issue with the footer being broken/missing ... pipe through zless as quickfix
         _ensure_dirname_exists(cachefile)
         cmd = "curl -s -H 'range: bytes={start}-{stop}' '{baseurl}/{filename}' | zless | gzip -c > {cachefile}"
