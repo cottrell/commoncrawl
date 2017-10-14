@@ -66,6 +66,7 @@ class CC():
         text = urllib.parse.quote_plus(text)
         filename = os.path.join(data_dir, crawl, text) + '.json'
         url = 'http://index.commoncrawl.org/{}-index?url={}&output=json'.format(crawl, text)
+        _ensure_dirname_exists(filename)
         cmd = "curl -s '{}' > {}".format(url, filename)
         r = lib_cached.run_cmd_with_cachefile(filename, cmd, return_result=True)
         r = r.strip().split('\n')
@@ -80,6 +81,7 @@ class CC():
         # WARNING this is just printing to current dir (search-data) is persisted to where you work
         cachefile = os.path.join('search-data', filename[11:])
         # there is some issue with the footer being broken/missing ... pipe through zless as quickfix
+        _ensure_dirname_exists(cachefile)
         cmd = "curl -s -H 'range: bytes={start}-{stop}' '{baseurl}/{filename}' | zless | gzip -c > {cachefile}"
         cmd = cmd.format(start=start, stop=stop, baseurl=_baseurl, filename=filename, cachefile=cachefile)
         dirname = os.path.dirname(cachefile)
@@ -90,6 +92,12 @@ class CC():
             return ret
         else:
             return cachefile
+
+def _ensure_dirname_exists(filename):
+    dirname = os.path.dirname(filename)
+    print("checking {}".format(dirname))
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
 
 cc = CC()
 
