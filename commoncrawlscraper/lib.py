@@ -56,7 +56,11 @@ class CC():
         out = self.list_crawls()
         res = list()
         for crawl in max_limit(out):
-            _res = self.search(text, crawl=crawl)
+            try:
+                _res = self.search(text, crawl=crawl)
+            except Exception as e:
+                print('ERROR skipping search({}, crawl={}). {}'.format(text, crawl, e))
+                continue
             res.extend(_res)
         return res
     def search(self, text, crawl=None):
