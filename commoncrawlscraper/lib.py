@@ -56,7 +56,8 @@ class CC():
         out = self.list_crawls()
         res = list()
         for crawl in max_limit(out):
-            res.extend(self.search(crawl, text))
+            _res = self.search(text, crawl=crawl)
+            res.extend(_res)
         return res
     def search(self, text, crawl=None):
         if crawl is None:
@@ -99,10 +100,10 @@ def _ensure_dirname_exists(filename):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-cc = CC()
+api = CC()
 
 def main(url, coll=None):
-    cc.search(url, crawl=coll)
+    api.search(url, crawl=coll)
 
 if __name__ == '__main__':
     argh.dispatch_command(main)
